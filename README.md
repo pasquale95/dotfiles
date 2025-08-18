@@ -37,7 +37,7 @@ stow -d "$DOTFILES_REPO_DIR" -t "$HOME"
 
 ## Usage
 
-By installing this repo, you will get some bash functions that can be useful to handle the dotfiles within your shell
+By installing this repo, you will get some shell functions that can be useful to handle the dotfiles within your shell.
 
 ### dot
 
@@ -74,7 +74,7 @@ dot-sync
 
 ### dot-add-env
 
-You can add a persistent environment variable for the entire machine running:
+You can add a shared environment variable, run:
 
 ```shell
 # this env variable will be synced with the other machines
