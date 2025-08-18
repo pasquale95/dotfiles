@@ -21,6 +21,6 @@ if [ -f "$HOME/.secrets" ]; then
 fi
 
 # source local configurations
-if [ -f "$HOME/.local" ]; then
-    source "$HOME/.local"
+if [ -f "$HOME/.local_config" ]; then
+    source "$HOME/.local_config"
 fi
