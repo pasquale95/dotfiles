@@ -1,0 +1,19 @@
+# text
+font-family = MesloLGS NF
+font-size = 13
+
+# screen
+theme = Solarized Dark Higher Contrast
+background-opacity = 0.85
+background-blur = 10
+
+# keybinds
+keybind = cmd+up=goto_split:up
+keybind = cmd+down=goto_split:down
+keybind = cmd+left=goto_split:left
+keybind = cmd+right=goto_split:right
+keybind = cmd+s>r=reload_config
+
+# options
+confirm-close-surface = false
+unfocused-split-fill = #2c3d42

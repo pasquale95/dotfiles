@@ -1,0 +1,23 @@
+# shellcheck disable=SC2148
+
+# prune all local branches that do not have a remote anymore
+git-prune-local() {
+    git fetch -p
+    git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -D
+}
+
+# set lima machine for podman
+podman-use-lima() {
+    limactl start podman
+    podman system connection default podman
+    sudo rm /var/run/docker.sock
+    sudo ln -s $HOME/.lima/podman/sock/podman.sock /var/run/docker.sock
+}
+
+# set default machine for podman
+podman-use-default() {
+    podman system connection default podman-machine-default-root
+    sudo rm /var/run/docker.sock
+    sudo ln -s $HOME/.local/share/containers/podman/machine/podman.sock /var/run/docker.sock
+}
+
