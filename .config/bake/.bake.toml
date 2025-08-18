@@ -1,0 +1,3 @@
+[formatter]
+group_phony_declarations = false
+phony_at_top = false
