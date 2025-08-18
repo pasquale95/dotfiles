@@ -1,5 +1,53 @@
 # shellcheck disable=SC2148
 
+# go to dotfiles location
+dot() {
+  cd "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" || exit 1
+}
+
+# install dotfiles
+dot-install() {
+    stow -d "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" -t "$HOME" .
+}
+
+# uninstall dotfiles
+dot-uninstall() {
+    stow -d "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" -t "$HOME" -D .
+}
+
+# pull the latest dotfiles and install them
+dot-sync() {
+  (cd "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" && git pull)
+  dot-install
+}
+
+# add a persisten env var 
+dot-add-env() {
+    local env_file input name value
+    if [[ "$1" == "--local" ]]; then
+        env_file="${DOTFILES_REPO_DIR:-$HOME/dotfiles}/.local_config"
+        input="$2"
+        if [[ "$input" == *"="* ]]; then
+            name="${input%%=*}"
+            value="${input#*=}"
+        else
+            name="$2"
+            value="$3"
+        fi
+    else
+        env_file="${DOTFILES_REPO_DIR:-$HOME/dotfiles}/.env"
+        input="$1"
+        if [[ "$input" == *"="* ]]; then
+            name="${input%%=*}"
+            value="${input#*=}"
+        else
+            name="$1"
+            value="$2"
+        fi
+    fi
+    echo "export ${name}=${value}" >> "$env_file"
+}
+
 # prune all local branches that do not have a remote anymore
 git-prune-local() {
     git fetch -p
@@ -20,4 +68,3 @@ podman-use-default() {
     sudo rm /var/run/docker.sock
     sudo ln -s $HOME/.local/share/containers/podman/machine/podman.sock /var/run/docker.sock
 }
-
