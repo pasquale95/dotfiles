@@ -68,3 +68,17 @@ podman-use-default() {
     sudo rm /var/run/docker.sock
     sudo ln -s "${HOME}/.local/share/containers/podman/machine/podman.sock" /var/run/docker.sock
 }
+
+# find files with name in the specified directory
+lg() {
+    if [ $# -eq 1 ]; then
+        # Only pattern provided, use current directory
+        la | grep -E "$1"
+    elif [ $# -eq 2 ]; then
+        # Directory and pattern provided
+        la "$1" | grep -E "$2"
+    else
+        echo "Usage: lg [directory] pattern"
+        return 1
+    fi
+}

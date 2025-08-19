@@ -1,19 +1,46 @@
 # shellcheck disable=SC2148
 
 # ALIASES
-# alias ll='ls -lah'
-alias here='open .'
-alias myip='ipconfig getifaddr en0'
-alias ports='lsof -iTCP -sTCP:LISTEN -n -P'
-alias docker-stop-containers='docker stop $(docker ps -aq)'
-alias docker-rm-containers='docker rm $(docker ps -aq)'
 
-# eza
-alias ls='eza --color=always --icons'
-alias ll='eza -lag --header --icons --octal-permissions --color=always'
-alias l='eza -lag --header --icons --octal-permissions --color=always'
-alias llm='eza -lbGd --header --git --sort=modified --color=always --icons' 
-alias la='eza -lag'
-alias lS='eza -1 --color=always --icons'
-alias lt='eza --tree --level=2 --color=always --icons'
-alias llg="ll | grep -E"
+# aliases if using /bin/ls + tree
+if (! command -v eza >/dev/null 2>&1); then
+    # Basic list with all files and colors
+    alias ls='ls -a --color=always'
+    # Long format with all files, human-readable sizes, and colors
+    alias ll='ls -lah --color=always'
+    # Same as ll (long format with all files)
+    alias l='ls -lah --color=always'
+    # Same as above (this was already equivalent to ls -lah)
+    alias la='ls -lah --color=always'
+    # Single column format with all files
+    alias lS='ls -a -1 --color=always'
+    # Tree view - requires the 'tree' command (not part of ls)
+    alias lt='tree -a -L 2'
+fi
+
+# To use these aliases, install eza
+if (command -v eza >/dev/null 2>&1); then
+    # one-line list
+    alias ls='eza -a --color=always --icons'
+    # multi-line list with header, colors, octal permissions
+    alias ll='eza -lag --header --icons --octal-permissions --color=always'
+    # multi-line list with icons
+    alias l='eza -lag --icons --color=always'
+    # multi-line list without icons (same as classic ls -lah)
+    alias la='eza -lag --color=always'
+    # multi-line list with file names only
+    alias lS='eza -a -1 --color=always --icons'
+    # multi-line tree with file names only
+    alias lt='eza -a --tree --level=2 --color=always --icons'
+fi
+
+# open current dir in Finder
+alias here='open .'
+# get machine IP
+alias myip='ipconfig getifaddr en0'
+# list all TCP ports
+alias ports='lsof -iTCP -sTCP:LISTEN -n -P'
+# stop all containers
+alias docker-stop-containers='docker stop $(docker ps -aq)'
+# remove all containers
+alias docker-rm-containers='docker rm $(docker ps -aq)'
