@@ -119,6 +119,9 @@ if [ -f "$HOME/.profile" ]; then
 fi
 
 # Autocompletion
-fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+# For podman make sure to create the completion correctly
+# with the command:
+# podman completion zsh > $HOME/.oh-my-zsh/completions/_podman
+fpath=(${ZSH}/completions $fpath)
 autoload -Uz compinit && compinit
 compdef docker=podman
