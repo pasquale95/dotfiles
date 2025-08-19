@@ -1,4 +1,5 @@
 # shellcheck disable=SC2148
+# shellcheck disable=SC2139
 
 # ALIASES
 
@@ -44,3 +45,12 @@ alias ports='lsof -iTCP -sTCP:LISTEN -n -P'
 alias docker-stop-containers='docker stop $(docker ps -aq)'
 # remove all containers
 alias docker-rm-containers='docker rm $(docker ps -aq)'
+# Print each PATH entry on a separate line
+alias path='echo -e ${PATH//:/\\n}'
+# Reload the shell (i.e. invoke as a login shell)
+alias reload="exec ${SHELL} -l"
+# Easier navigation: .., ..., ...., ....., ~ and -
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
