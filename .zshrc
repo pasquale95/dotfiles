@@ -114,6 +114,9 @@ fi
 
 # Autocompletion
 export ZSH_COMPLETION_DIR="${ZSH}/completions"
+if [ ! -d "${ZSH_COMPLETION_DIR}" ]; then
+  mkdir -p "${ZSH_COMPLETION_DIR}"
+fi
 fpath=(${ZSH_COMPLETION_DIR} $fpath)
 
 # Generate podman autocomplete if missing and podman is installed
