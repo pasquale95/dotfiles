@@ -2,22 +2,22 @@
 
 # go to dotfiles location
 dot() {
-  cd "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" || exit 1
+  cd "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" || exit 1
 }
 
 # install dotfiles
 dot-install() {
-    stow -d "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" -t "$HOME" .
+    stow -d "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" -t "${HOME}" .
 }
 
 # uninstall dotfiles
 dot-uninstall() {
-    stow -d "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" -t "$HOME" -D .
+    stow -d "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" -t "${HOME}" -D .
 }
 
 # pull the latest dotfiles and install them
 dot-sync() {
-  (cd "${DOTFILES_REPO_DIR:-$HOME/dotfiles}" && git pull)
+  (cd "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" && git pull)
   dot-install
 }
 
@@ -25,7 +25,7 @@ dot-sync() {
 dot-add-env() {
     local env_file input name value
     if [[ "$1" == "--local" ]]; then
-        env_file="${DOTFILES_REPO_DIR:-$HOME/dotfiles}/.local_config"
+        env_file="${DOTFILES_REPO_DIR:-${HOME}/dotfiles}/.local_config"
         input="$2"
         if [[ "$input" == *"="* ]]; then
             name="${input%%=*}"
@@ -35,7 +35,7 @@ dot-add-env() {
             value="$3"
         fi
     else
-        env_file="${DOTFILES_REPO_DIR:-$HOME/dotfiles}/.env"
+        env_file="${DOTFILES_REPO_DIR:-${HOME}/dotfiles}/.env"
         input="$1"
         if [[ "$input" == *"="* ]]; then
             name="${input%%=*}"
@@ -59,12 +59,12 @@ podman-use-lima() {
     limactl start podman
     podman system connection default podman
     sudo rm /var/run/docker.sock
-    sudo ln -s $HOME/.lima/podman/sock/podman.sock /var/run/docker.sock
+    sudo ln -s "${HOME}/.lima/podman/sock/podman.sock" /var/run/docker.sock
 }
 
 # set default machine for podman
 podman-use-default() {
     podman system connection default podman-machine-default-root
     sudo rm /var/run/docker.sock
-    sudo ln -s $HOME/.local/share/containers/podman/machine/podman.sock /var/run/docker.sock
+    sudo ln -s "${HOME}/.local/share/containers/podman/machine/podman.sock" /var/run/docker.sock
 }

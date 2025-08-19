@@ -18,7 +18,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
+# a theme from this variable instead of looking in ${ZSH}/themes/
 # If set to an empty array, this variable will have no effect.
 # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 
@@ -68,11 +68,11 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # see 'man strftime' for details.
 # HIST_STAMPS="mm/dd/yyyy"
 
-# Would you like to use another custom folder than $ZSH/custom?
+# Would you like to use another custom folder than ${ZSH}/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
 # Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
+# Standard plugins can be found in ${ZSH}/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
@@ -100,28 +100,34 @@ asdf
 # export ARCHFLAGS="-arch x86_64"
 
 # Path to your oh-my-zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
-if [ -f "$ZSH/oh-my-zsh.sh" ]; then
-  source "$ZSH/oh-my-zsh.sh"
+export ZSH="${HOME}/.oh-my-zsh"
+if [ -f "${ZSH}/oh-my-zsh.sh" ]; then
+  source "${ZSH}/oh-my-zsh.sh"
 fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-if [ -f "$HOME/.p10k.zsh" ]; then
-  source "$HOME/.p10k.zsh"
+if [ -f "${HOME}/.p10k.zsh" ]; then
+  source "${HOME}/.p10k.zsh"
 fi
 
 # Store dumps in a different folder
-export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
+export ZSH_COMPDUMP="${ZSH}/cache/.zcompdump-${HOST}"
 
 # source profile
-if [ -f "$HOME/.profile" ]; then
-  source "$HOME/.profile"
+if [ -f "${HOME}/.profile" ]; then
+  source "${HOME}/.profile"
 fi
 
 # Autocompletion
-# For podman make sure to create the completion correctly
-# with the command:
-# podman completion zsh > $HOME/.oh-my-zsh/completions/_podman
-fpath=(${ZSH}/completions $fpath)
+export ZSH_COMPLETION_DIR="${ZSH}/completions"
+fpath=(${ZSH_COMPLETION_DIR} $fpath)
+
+# Generate podman autocomplete if missing and podman is installed
+if (command -v podman >/dev/null 2>&1) && [ ! -f "${ZSH_COMPLETION_DIR}/_podman" ]; then
+  podman completion zsh > "${ZSH_COMPLETION_DIR}/_podman"
+fi
+
 autoload -Uz compinit && compinit
+
+# use podman autocomplete also for docker
 compdef docker=podman
