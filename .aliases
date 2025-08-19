@@ -1,9 +1,19 @@
 # shellcheck disable=SC2148
 
 # ALIASES
-alias ll='ls -lah'
+# alias ll='ls -lah'
 alias here='open .'
 alias myip='ipconfig getifaddr en0'
 alias ports='lsof -iTCP -sTCP:LISTEN -n -P'
 alias docker-stop-containers='docker stop $(docker ps -aq)'
 alias docker-rm-containers='docker rm $(docker ps -aq)'
+
+# eza
+alias ls='eza --color=always --icons'
+alias ll='eza -lag --header --icons --octal-permissions --color=always'
+alias l='eza -lag --header --icons --octal-permissions --color=always'
+alias llm='eza -lbGd --header --git --sort=modified --color=always --icons' 
+alias la='eza -lag'
+alias lS='eza -1 --color=always --icons'
+alias lt='eza --tree --level=2 --color=always --icons'
+alias llg="ll | grep -E"
