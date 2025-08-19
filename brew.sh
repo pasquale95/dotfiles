@@ -8,7 +8,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
     # Install needed tools
     brew install stow
+    brew install bash
     brew install bash-completion
+    brew install git
+    brew install asdf
     brew install eza
     brew install tree
 

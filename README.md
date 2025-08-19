@@ -24,7 +24,6 @@ If so, run:
 export $DOTFILES_REPO_DIR=$HOME/dotfiles
 git clone git@github.com:pasquale95/dotfiles.git $DOTFILES_REPO_DIR
 cd $DOTFILES_REPO_DIR
-stow -d "$DOTFILES_REPO_DIR" -t "$HOME" .
 ./install.sh
 ```
 
@@ -41,8 +40,7 @@ Some aliases and functions require some packages to be installed on the macOS ma
 To uninstall:
 
 ```shell
-# from $HOME/dotfiles
-stow -d "$DOTFILES_REPO_DIR" -t "$HOME"
+./uninstall.sh
 ```
 
 ## Usage
