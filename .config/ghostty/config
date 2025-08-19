@@ -17,3 +17,5 @@ keybind = cmd+s>r=reload_config
 # options
 confirm-close-surface = false
 unfocused-split-fill = #2c3d42
+cursor-style = block
+shell-integration-features = no-cursor

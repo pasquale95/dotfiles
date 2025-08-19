@@ -14,6 +14,12 @@ config.window_background_opacity = 0.85
 config.macos_window_background_blur = 10
 config.use_fancy_tab_bar = false
 
+-- cursor
+config.default_cursor_style = "BlinkingBlock"
+config.cursor_blink_rate = 800
+config.cursor_blink_ease_in = 'Constant'
+config.cursor_blink_ease_out = 'Constant'
+
 -- Dim inactive panes
 config.inactive_pane_hsb = {
   saturation = 1, -- reduce color intensity a bit

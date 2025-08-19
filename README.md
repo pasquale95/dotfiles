@@ -49,7 +49,7 @@ By installing this repo, you will get some shell functions that can be useful to
 
 ### dot
 
-`dot` allows to quickly go into the dotfiles folder
+`dot` allows to quickly go into the dotfiles folder:
 
 ```shell
 # go to $DOTFILES_REPO_DIR from anywhere
