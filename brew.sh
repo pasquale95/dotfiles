@@ -1,23 +1,36 @@
 #!/bin/bash
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # Make sure we’re using the latest Homebrew.
-    brew update
-    # Upgrade any already-installed formulae.
-    brew upgrade
+if (! command -v brew >/dev/null 2>&1); then
+    if [ ! -f /opt/homebrew/bin/brew ] || [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+        # install since not present
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
 
-    # Install needed tools
-    brew install stow
-    brew install bash
-    brew install bash-completion
-    brew install git
-    brew install asdf
-    brew install eza
-    brew install tree
-
-    # Clean brew
-    brew cleanup
-else
-    echo "You are not on macOS. Aborting."
-    exit 1
+    # source brew env
+    if [ -f /opt/homebrew/bin/brew ]; then
+        # typical path where resides on macOS
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+        # typical path where resides on linux
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
 fi
+
+# Make sure we’re using the latest Homebrew.
+brew update
+# Upgrade any already-installed formulae.
+brew upgrade
+
+# Install needed tools
+brew install --quiet gcc
+brew install --quiet stow
+brew install --quiet bash
+brew install --quiet bash-completion
+brew install --quiet git
+brew install --quiet asdf
+brew install --quiet eza
+brew install --quiet tree
+brew install --quiet nvim
+
+# Clean brew
+brew cleanup
