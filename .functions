@@ -9,7 +9,6 @@ dot() {
 # install dotfiles
 dot-install() {
     stow -d "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" -t "${HOME}" .
-    echo $SHELL
     
     # Auto-source shell configuration based on $SHELL
     if [[ "${SHELL}" == *zsh* ]]; then
