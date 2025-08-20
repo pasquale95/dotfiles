@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# For our setup on both macOS and Linux, we rely on the "brew" package manager.
+# This package manager is reliable and offers the same user experience
+# across the platforms.
+# If you don't want to install it on your machine, then DO NOT RUN this script.
 if (! command -v brew >/dev/null 2>&1); then
     if [ ! -f /opt/homebrew/bin/brew ] || [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
         # install since not present
@@ -25,12 +29,12 @@ brew upgrade
 brew install --quiet gcc
 brew install --quiet stow
 brew install --quiet bash
-brew install --quiet bash-completion
-brew install --quiet git
 brew install --quiet asdf
+brew install --quiet git
 brew install --quiet eza
 brew install --quiet tree
 brew install --quiet nvim
+brew install --quiet bash-completion
 
 # Clean brew
 brew cleanup

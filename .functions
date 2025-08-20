@@ -2,12 +2,21 @@
 
 # go to dotfiles location
 dot() {
-  cd "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" || exit 1
+  # shellcheck disable=SC2164
+  cd "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}"
 }
 
 # install dotfiles
 dot-install() {
     stow -d "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" -t "${HOME}" .
+    echo $SHELL
+    
+    # Auto-source shell configuration based on $SHELL
+    if [[ "${SHELL}" == *zsh* ]]; then
+        source "${HOME}/.zshrc"
+    elif [[ "${SHELL}" == *bash* ]]; then
+        source "${HOME}/.bashrc"
+    fi
 }
 
 # uninstall dotfiles

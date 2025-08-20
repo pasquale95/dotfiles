@@ -1,46 +1,52 @@
 #!/bin/bash
 
+INSTALL_DEPS=0
+
+# Function to display help message
+function display_help() {
+    cat <<EOF
+Usage: $0 [OPTIONS]
+
+Options:
+  --deps            Install also the additional packages required by some functions and aliases.
+  -h, --help        Display this help message and exit.
+
+Examples:
+  $0
+  $0 --skip-deps
+EOF
+}
+
+function parse_script_args() {
+    while [[ "$#" -gt 0 ]]; do
+        case "$1" in
+        --deps)
+            INSTALL_DEPS=1
+            ;;
+        -h | --help)
+            display_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            ;;
+        esac
+        shift
+    done
+}
+
+parse_script_args "$@"
 echo "🕒 Installing dotfiles..."
 
-if (! command -v brew >/dev/null 2>&1); then
-    if [ ! -f /opt/homebrew/bin/brew ] || [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-        # install since not present
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    fi
-
-    # source brew env
-    if [ -f /opt/homebrew/bin/brew ]; then
-        # typical path where resides on macOS
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-        # typical path where resides on linux
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    fi
+if [[ INSTALL_DEPS -eq 1 ]]; then
+    # install all the additional dependencies using brew
+    ./brew.sh
 fi
-
-# Make sure we’re using the latest Homebrew.
-brew update
-# Upgrade any already-installed formulae.
-brew upgrade
-
-# Install needed tools
-brew install --quiet gcc
-brew install --quiet stow
-brew install --quiet bash
-brew install --quiet bash-completion
-brew install --quiet git
-brew install --quiet asdf
-brew install --quiet eza
-brew install --quiet tree
-brew install --quiet nvim
-
-# Clean brew
-brew cleanup
 
 # install dotfiles
 source ./.functions
-dot-install
+stow -d "${DOTFILES_REPO_DIR:-${HOME}/dotfiles}" -t "${HOME}" .
 dot-add-env --local DOTFILES_REPO_DIR="${DOTFILES_REPO_DIR:-$PWD}"
-source "${HOME}/.profile"
 
 echo "✅ Dotfiles successfully installed!"
+echo "Run 'dot-install' to sync the dotfiles in your current shell."

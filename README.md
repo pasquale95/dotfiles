@@ -5,7 +5,7 @@ Collection of dotfiles that can be used to quickly setup a new macOS.
 ## Table of Contents <!-- omit in toc -->
 
 - [How to install](#how-to-install)
-  - [Install dependencies on macOS](#install-dependencies-on-macos)
+  - [Install dependencies](#install-dependencies)
 - [How to uninstall](#how-to-uninstall)
 - [Usage](#usage)
   - [dot](#dot)
@@ -24,16 +24,21 @@ If so, run:
 export $DOTFILES_REPO_DIR=$HOME/dotfiles
 git clone git@github.com:pasquale95/dotfiles.git $DOTFILES_REPO_DIR
 cd $DOTFILES_REPO_DIR
+
+# install dotfiles (without the deps)
 ./install.sh
 ```
 
-### Install dependencies on macOS
+### Install dependencies
 
-Some aliases and functions require some packages to be installed on the macOS machine. If you want, you can install them by running:
+Some aliases and functions require some packages to be installed. If you want, you can install them by running:
 
 ```shell
-./brew.sh
+# install dotfiles and dependencies through "brew"
+./install.sh --deps
 ```
+
+**NOTE**: the external packages that are needed are installed via `brew` on both macOS and Linux, to share the same user experience across the platforms.
 
 ## How to uninstall
 
