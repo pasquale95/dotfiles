@@ -2,3 +2,5 @@ install.sh
 uninstall.sh
 brew.sh
 README.md
+.git
+.gitignore
