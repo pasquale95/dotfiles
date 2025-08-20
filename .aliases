@@ -3,24 +3,9 @@
 
 # ALIASES
 
-# aliases if using /bin/ls + tree
-if (! command -v eza >/dev/null 2>&1); then
-    # Basic list with all files and colors
-    alias ls='ls -a --color=always'
-    # Long format with all files, human-readable sizes, and colors
-    alias ll='ls -lah --color=always'
-    # Same as ll (long format with all files)
-    alias l='ls -lah --color=always'
-    # Same as above (this was already equivalent to ls -lah)
-    alias la='ls -lah --color=always'
-    # Single column format with all files
-    alias lS='ls -a -1 --color=always'
-    # Tree view - requires the 'tree' command (not part of ls)
-    alias lt='tree -a -L 2'
-fi
-
-# To use these aliases, install eza
 if (command -v eza >/dev/null 2>&1); then
+    # To use these aliases, install eza
+    
     # one-line list
     alias ls='eza -a --color=always --icons'
     # multi-line list with header, colors, octal permissions
@@ -33,6 +18,21 @@ if (command -v eza >/dev/null 2>&1); then
     alias lS='eza -a -1 --color=always --icons'
     # multi-line tree with file names only
     alias lt='eza -a --tree --level=2 --color=always --icons'
+elif (! command -v eza >/dev/null 2>&1); then
+    # aliases if using /bin/ls + tree
+    
+    # Basic list with all files and colors
+    alias ls='ls -a --color=always'
+    # Long format with all files, human-readable sizes, and colors
+    alias ll='ls -lah --color=always'
+    # Same as ll (long format with all files)
+    alias l='ls -lah --color=always'
+    # Same as above (this was already equivalent to ls -lah)
+    alias la='ls -lah --color=always'
+    # Single column format with all files
+    alias lS='ls -a -1 --color=always'
+    # Tree view - requires the 'tree' command (not part of ls)
+    alias lt='tree -a -L 2'
 fi
 
 # open current dir in Finder
