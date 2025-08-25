@@ -90,3 +90,83 @@ lg() {
         return 1
     fi
 }
+
+# Convert MOV to MP4 with flexible input/output handling
+mov_to_mp4() {
+    if [ $# -eq 0 ] || [ $# -gt 2 ]; then
+        echo "Usage: mov_to_mp4 <input.mov> [output.mp4]"
+        echo "Example: mov_to_mp4 video.mov video.mp4"
+        return 1
+    fi
+    
+    local input="$1"
+    local output="${2:-${input%.*}.mp4}"
+    
+    if [ ! -f "$input" ]; then
+        echo "Error: Input file '$input' not found"
+        return 1
+    fi
+    
+    echo "Converting: $input -> $output"
+    ffmpeg -i "$input" -c:v libx264 -crf 23 -c:a aac -b:a 128k "$output"
+    echo "Successfully converted $input -> $output"
+}
+
+# Cut video segment with time format
+cut_video() {
+    if [ $# -lt 3 ]; then
+        echo "Usage: cut_video <input_file> <start_time> <end_time> [output_file]"
+        echo "Time format: mm:ss or hh:mm:ss"
+        echo "Example: cut_video video.mp4 cut.mp4 0:05 1:15"
+        return 1
+    fi
+    
+    local input="$1"
+    local start="$2"
+    local end="$3"
+    local output="${4:-${input%.*}_${start}-${end}.mp4}"
+    
+    if [ ! -f "$input" ]; then
+        echo "Error: Input file '$input' not found"
+        return 1
+    fi
+    
+    ffmpeg -i "$input" -ss "$start" -to "$end" -c copy "$output"
+    echo "Cut video from $start to $end as $output"
+}
+
+# Generate gif from video with optional start and end time
+gif() {
+    if [ $# -lt 1 ] || [ $# -gt 4 ]; then
+        echo "Usage: gif <input_file> [output_file] [start_time] [end_time]"
+        echo "If no start/end specified: converts entire video to GIF"
+        echo "Time format: mm:ss or hh:mm:ss"
+        echo "Example: gif video.mp4 video.gif 0:05 1:15"
+        return 1
+    fi
+    
+    local input="$1"
+    local output="${2:-${input%.*}.gif}"
+    local start="$3"
+    local end="$4"
+    local conversion_format="fps=15,scale=1920:-1"
+    
+    if [ ! -f "$input" ]; then
+        echo "Error: Input file '$input' not found"
+        return 1
+    fi
+
+    if [ -z "$start" ]; then
+        # Convert entire video
+        ffmpeg -i "$input" -vf "$conversion_format" -loop 0 "$output"
+        echo "Converted entire video as $output"
+    elif [ -z "$end" ]; then
+        # Extract segment
+        ffmpeg -i "$input" -ss "$start" -vf "$conversion_format" -loop 0 "$output"
+        echo "Converted video from $start as $output"
+    else
+        # Extract segment
+        ffmpeg -i "$input" -ss "$start" -to "$end" -vf "$conversion_format" -loop 0 "$output"
+        echo "Converted video from $start to $end as $output"
+    fi
+}
