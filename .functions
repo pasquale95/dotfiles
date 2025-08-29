@@ -170,3 +170,24 @@ gif() {
         echo "Converted video from $start to $end as $output"
     fi
 }
+
+# Return the size of a given path
+size() {
+    if [ -z "$1" ]; then
+        echo "Usage: size <directory_or_file>"
+        return 1
+    fi
+    
+    if [ ! -e "$1" ]; then
+        echo "Error: '$1' does not exist"
+        return 1
+    fi
+    
+    if [ -d "$1" ]; then
+        echo "Content Size:"
+        du -sh "$1"/* 2>/dev/null | sort -hr
+    fi
+    
+    echo "Size:"
+    du -sh "$1" 2>/dev/null
+}
