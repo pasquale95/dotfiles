@@ -36,6 +36,8 @@ brew install --quiet tree
 brew install --quiet nvim
 brew install --quiet bash-completion
 brew install --quiet ffmpeg
+brew install --quiet nmap
+brew install --quiet curl
 
 # Clean brew
 brew cleanup

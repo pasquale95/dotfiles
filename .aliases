@@ -37,8 +37,6 @@ fi
 
 # open current dir in Finder
 alias here='open .'
-# get machine IP
-alias myip='ipconfig getifaddr en0'
 # list all TCP ports
 alias ports='lsof -iTCP -sTCP:LISTEN -n -P'
 # stop all containers

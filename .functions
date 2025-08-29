@@ -191,3 +191,29 @@ size() {
     echo "Size:"
     du -sh "$1" 2>/dev/null
 }
+
+# Return the machine public IP
+myip() {
+    if command -v ip >/dev/null 2>&1; then
+        # Linux
+        ip route get 1 | awk '{print $7}'
+    elif command -v ifconfig >/dev/null 2>&1; then
+        # macOS and other Unix systems
+        ifconfig | grep -E 'inet (192|10|172)' | head -1 | awk '{print $2}'
+    else
+        # Fallback for systems without ip/ifconfig
+        echo "Error: Neither 'ip' nor 'ifconfig' command found"
+        return 1
+    fi
+}
+
+myip-global() {
+    # Try multiple methods to get public IP
+    if command -v curl >/dev/null 2>&1; then
+        curl -s https://api.ipify.org
+    else
+        # Fallback to local IP if no external tools available
+        echo "Error: please install 'curl'"
+        return 1
+    fi
+}
