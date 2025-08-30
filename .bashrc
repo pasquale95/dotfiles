@@ -1,5 +1,9 @@
 # shellcheck disable=SC2148
 
+# Fix to prevent LMStudio polluting my dotfiles at every start
+# https://github.com/lmstudio-ai/lmstudio-bug-tracker/issues/656#issuecomment-2938234807
+# /Users/pco/.lmstudio/bin
+
 # source profile
 if [ -f "${HOME}/.profile" ]; then
   source "${HOME}/.profile"
@@ -15,3 +19,4 @@ if [ -f "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]; then
 
   source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
 fi
+

@@ -128,3 +128,7 @@ autoload -Uz compinit && compinit
 
 # use podman autocomplete also for docker
 compdef docker=podman
+
+# Fix to prevent LMStudio polluting my dotfiles at every start
+# https://github.com/lmstudio-ai/lmstudio-bug-tracker/issues/656#issuecomment-2938234807
+# /Users/pco/.lmstudio/bin
