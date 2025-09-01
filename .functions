@@ -209,13 +209,31 @@ myip() {
     fi
 }
 
+# Get the machine public IP
 myip-global() {
-    # Try multiple methods to get public IP
     if command -v curl >/dev/null 2>&1; then
         curl -s https://api.ipify.org
     else
         # Fallback to local IP if no external tools available
         echo "Error: please install 'curl'"
         return 1
+    fi
+}
+
+# Find a process with a given string inside its name
+pfind() {
+    # Guard against empty argument
+    if [[ -z "$1" ]]; then
+        echo "Usage: pfind <search‑string>"
+        return 1
+    fi
+
+    printf "%-5s %s\n" "PID" "CMD"
+    # Use pgrep if available – it prints PID and full command line
+    if command -v pgrep >/dev/null 2>&1; then
+        pgrep -ifl "$1"
+    else
+        # Fallback to ps + grep, filtering out the grep process itself
+        ps -eo pid,args | grep -i "$1" | grep -v "[g]rep"
     fi
 }
