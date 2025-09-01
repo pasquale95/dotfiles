@@ -199,7 +199,9 @@ myip() {
         ip route get 1 | awk '{print $7}'
     elif command -v ifconfig >/dev/null 2>&1; then
         # macOS and other Unix systems
-        ifconfig | grep -E 'inet (192|10|172)' | head -1 | awk '{print $2}'
+        local default_interface
+        default_interface=$(route -n get default 2>/dev/null | grep interface | awk '{print $2}')
+        ifconfig "$default_interface" 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}'
     else
         # Fallback for systems without ip/ifconfig
         echo "Error: Neither 'ip' nor 'ifconfig' command found"
