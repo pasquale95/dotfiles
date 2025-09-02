@@ -237,3 +237,58 @@ pfind() {
         ps -eo pid,args | grep -i "$1" | grep -v "[g]rep"
     fi
 }
+
+# Start ollama daemon
+ollama-start() {
+    if pgrep -x ollama >/dev/null 2>&1; then
+        echo "ollama is already running."
+        return 0
+    fi
+
+    echo "Starting ollama (background)..."
+    nohup ollama serve >/dev/null 2>&1 &
+    # Give it a moment to start
+    sleep 2
+    if pgrep -x ollama >/dev/null 2>&1; then
+        echo "ollama started."
+    else
+        echo "Failed to start ollama."
+        return 1
+    fi
+}
+
+# Stop ollama daemon
+ollama-stop() {
+    echo "Stopping ollama..."
+    pkill -ix ollama 2>/dev/null || {
+        echo "No ollama process found."
+        return 1
+    }
+    echo "ollama stopped."
+}
+
+# Load a model in ollama disabling automatic unload
+ollama-load() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: ollama-load <model-name>"
+        return 1
+    fi
+
+    local url="http://${OLLAMA_HOST:-localhost}:11434/api/generate"
+    local payload="{\"model\": \"$1\", \"keep_alive\": -1}"
+
+    curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$url"
+}
+
+# Unload a model in ollama
+ollama-unload() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: ollama-unload <model-name>"
+        return 1
+    fi
+
+    local url="http://${OLLAMA_HOST:-localhost}:11434/api/generate"
+    local payload="{\"model\": \"$1\", \"keep_alive\": 0}"
+
+    curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$url"
+}
