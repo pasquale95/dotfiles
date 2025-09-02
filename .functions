@@ -274,7 +274,7 @@ ollama-load() {
         return 1
     fi
 
-    local url="http://${OLLAMA_HOST:-localhost}:11434/api/generate"
+    local url="${OLLAMA_HOST:-http://localhost:11434}/api/generate"
     local payload="{\"model\": \"$1\", \"keep_alive\": -1}"
 
     curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$url"
@@ -287,7 +287,7 @@ ollama-unload() {
         return 1
     fi
 
-    local url="http://${OLLAMA_HOST:-localhost}:11434/api/generate"
+    local url="http://${OLLAMA_HOST:-localhost:11434}/api/generate"
     local payload="{\"model\": \"$1\", \"keep_alive\": 0}"
 
     curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$url"
