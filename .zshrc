@@ -105,7 +105,7 @@ if [ -f "${HOME}/.p10k.zsh" ]; then
 fi
 
 # Store dumps in a different folder
-export ZSH_COMPDUMP="${ZSH}/cache/.zcompdump-${HOST}"
+export ZSH_COMPDUMP="${ZSH}/cache/.zcompdump-$(hostname -s)"
 
 # source profile
 if [ -f "${HOME}/.profile" ]; then
