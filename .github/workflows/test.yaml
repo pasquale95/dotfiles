@@ -29,6 +29,7 @@ jobs:
           echo "AFTER 1"
           ls -la ~
           source ~/.profile
+          ll
           dot-install
           echo "AFTER 2"
           ll
