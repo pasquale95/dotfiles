@@ -1,0 +1,139 @@
+minimumLimaVersion: 1.1.0
+
+# VM settings
+cpus: 4
+memory: "16GiB"
+disk: "100GiB"
+
+# Templates to use as base
+base:
+  - template://_images/fedora-41
+
+# Writable mounts override
+mounts:
+  - location: "~"
+    writable: true
+
+# Disable containerd
+containerd:
+  system: false
+  user: false
+
+# Provision scripts to setup the VM
+provision:
+  # System-level setup (runs as root)
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+
+      # Check if already provisioned
+      test -e /etc/lima-fedora-system-provision && exit 0
+
+      # Update system packages
+      # dnf -y update
+
+      # Install development tools
+      dnf -y install \
+        runc \
+        vim \
+        make \
+        gcc \
+        gcc-c++ \
+        curl \
+        wget \
+        git \
+        tar \
+        gzip \
+        unzip \
+        which \
+        htop \
+        tree \
+        jq \
+        nc \
+        bind-utils \
+        tmux \
+        python3 \
+        python3-pip \
+        stow \
+        openssl
+
+      # Install Docker
+      curl -fsSL https://get.docker.com | sh
+      systemctl enable --now docker
+
+      # Install Podman
+      dnf -y install podman
+
+      # Configure runc as default runtime
+      mkdir -p /etc/containers
+      printf '%s\n' \
+        '[engine]' \
+        'runtime = "runc"' \
+        '' \
+        '[engine.runtimes]' \
+        'runc = ["/usr/bin/runc"]' \
+        'crun = ["/usr/bin/crun"]' \
+        > /etc/containers/containers.conf
+
+      # Mark provisioning as complete
+      touch /etc/lima-fedora-system-provision
+  # User-level setup (runs as normal user)
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+
+      # Check if already provisioned
+      test -e /etc/lima-fedora-user-provision && exit 0
+
+      # Copy runtime config to user directory
+      mkdir -p ~/.config/containers
+      cp /etc/containers/containers.conf ~/.config/containers/
+
+      # Give user possibility to run docker as root (requires relogin)
+      sudo usermod -aG docker "$USER"
+
+      # Create rootless docker socket and use it by default
+      dockerd-rootless-setuptool.sh install
+      docker context use rootless
+
+      # Enable podman socket for remote connections
+      systemctl --user enable --now podman.socket
+
+      # Install dotfiles
+      git clone https://github.com/pasquale95/dotfiles.git ~/dotfiles
+      ~/dotfiles/install.sh --deps --force
+
+      # Mark provisioning as complete
+      sudo touch /etc/lima-fedora-user-provision
+
+# Health probes
+probes:
+  - script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      if ! timeout 30s bash -c "until command -v podman >/dev/null 2>&1; do sleep 3; done"; then
+        echo >&2 "podman is not installed yet"
+        exit 1
+      fi
+      if ! timeout 30s bash -c "until command -v docker >/dev/null 2>&1; do sleep 3; done"; then
+        echo >&2 "docker is not installed yet"
+        exit 1
+      fi
+    hint: See "/var/log/cloud-init-output.log" in the guest
+
+# Startup message
+message: |
+  ======================================================================
+  fedora VM ready!
+  To connect, run:
+  ------
+  limactl shell fedora
+  ------
+  Note:
+    - The home directory is mounted as WRITABLE. You can read/write
+      files directly from your macOS filesystem.
+    - docker is enabled as rootless. To use rootful docker, restart the
+      machine and run "docker context use default".
+  ======================================================================

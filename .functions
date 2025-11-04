@@ -293,6 +293,7 @@ ollama-unload() {
     curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$url"
 }
 
+# Open an x509 certificate
 opencert() {
     if [[ -z "$1" ]]; then
         echo "Usage: opencert <path-to-cert>"

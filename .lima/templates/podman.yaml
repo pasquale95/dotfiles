@@ -1,0 +1,72 @@
+minimumLimaVersion: 1.1.0
+
+cpus: 4
+memory: "16GiB"
+disk: "100GiB"
+
+base:
+  - template://_images/fedora-41
+  - template://_default/mounts
+
+containerd:
+  system: false
+  user: false
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      command -v podman >/dev/null 2>&1 && test -e /etc/lima-podman && exit 0
+
+      # Install podman AND runc
+      dnf -y install --best podman runc podman-docker && touch /etc/lima-podman
+
+      # Configure runc as default runtime
+      mkdir -p /etc/containers
+      printf '%s\n' \
+        '[engine]' \
+        'runtime = "runc"' \
+        '' \
+        '[engine.runtimes]' \
+        'runc = ["/usr/bin/runc"]' \
+        'crun = ["/usr/bin/crun"]' \
+        > /etc/containers/containers.conf
+
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+
+      # Copy runtime config to user directory
+      mkdir -p ~/.config/containers
+      cp /etc/containers/containers.conf ~/.config/containers/
+
+      # Your existing service enable
+      systemctl --user enable --now podman.socket
+
+probes:
+  - script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      if ! timeout 30s bash -c "until command -v podman >/dev/null 2>&1; do sleep 3; done"; then
+        echo >&2 "podman is not installed yet"
+        exit 1
+      fi
+    hint: See "/var/log/cloud-init-output.log" in the guest
+
+portForwards:
+  - guestSocket: "/run/user/{{.UID}}/podman/podman.sock"
+    hostSocket: "{{.Dir}}/sock/podman.sock"
+
+message: |
+  ======================================================================
+  podman VM ready!
+
+  To run `podman` on the host (assumes podman-remote is installed), run the following commands:
+  ------
+  podman system connection add {{.Name}} "unix://{{.Dir}}/sock/podman.sock"
+  podman system connection default {{.Name}}
+  podman{{if eq .HostOS "linux"}} --remote{{end}} run quay.io/podman/hello
+  ------
+  ======================================================================
