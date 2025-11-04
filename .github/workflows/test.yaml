@@ -22,6 +22,7 @@ jobs:
         env:
           DOTFILES_REPO_DIR: ${{ github.workspace }}
         run: |
+          echo $SHELL
           echo "BEFORE"
           ls -la ~
           ./install.sh --deps --force
@@ -30,7 +31,7 @@ jobs:
           source ~/.profile
           dot-install
           echo "AFTER 2"
-          ls -la ~
+          ll
 
       # Check dotfiles are installed
       - name: Check that the dotfiles have been correctly installed
