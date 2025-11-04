@@ -23,8 +23,11 @@ jobs:
           DOTFILES_REPO_DIR: ${{ github.workspace }}
         run: |
           ./install.sh --deps --force
+          dot-install
 
       # Check dotfiles are installed
       - name: Check that the dotfiles have been correctly installed
         run: |
+          ls -la ~
+          dot-install
           ll ~
