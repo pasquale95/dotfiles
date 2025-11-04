@@ -19,24 +19,9 @@ jobs:
 
       # Install dotfiles
       - name: Install dotfiles
+        shell: bash -ieo pipefail {0}
         env:
           DOTFILES_REPO_DIR: ${{ github.workspace }}
         run: |
-          echo $SHELL
-          echo "BEFORE"
-          ls -la ~
           ./install.sh --deps --force
-          echo "AFTER 1"
-          ls -la ~
-          source ~/.profile
-          ll
-          dot-install
-          echo "AFTER 2"
-          ll
-
-      # Check dotfiles are installed
-      - name: Check that the dotfiles have been correctly installed
-        run: |
-          ls -la ~
-          dot-install
           ll ~
