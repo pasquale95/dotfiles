@@ -22,8 +22,14 @@ jobs:
         env:
           DOTFILES_REPO_DIR: ${{ github.workspace }}
         run: |
+          echo "BEFORE"
+          ls -la ~
           ./install.sh --deps --force
+          echo "AFTER 1"
+          ls -la ~
           dot-install
+          echo "AFTER 2"
+          ls -la ~
 
       # Check dotfiles are installed
       - name: Check that the dotfiles have been correctly installed
