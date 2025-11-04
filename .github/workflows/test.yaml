@@ -27,6 +27,7 @@ jobs:
           ./install.sh --deps --force
           echo "AFTER 1"
           ls -la ~
+          source ~/.profile
           dot-install
           echo "AFTER 2"
           ls -la ~
