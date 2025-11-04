@@ -50,12 +50,15 @@ echo "🕒 Installing dotfiles..."
 if [[ INSTALL_DEPS -eq 1 ]]; then
     # install all the additional dependencies using brew
     "${DOTFILES_REPO_DIR}/brew.sh"
-fi
 
-# install missing dependency
-if (! command -v stow >/dev/null 2>&1); then
-    echo "stow is not installed. Installing it..."
-    brew install stow
+    # source brew env
+    if [ -f /opt/homebrew/bin/brew ]; then
+        # typical path where resides on macOS
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+        # typical path where resides on linux
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
 fi
 
 if [[ INSTALL_FORCE -eq 1 ]]; then

@@ -1,0 +1,27 @@
+name: Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  # Enable manual triggering
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install dotfiles
+      - name: Install dotfiles
+        shell: bash -ieo pipefail {0}
+        env:
+          DOTFILES_REPO_DIR: ${{ github.workspace }}
+        run: |
+          ./install.sh --deps --force
+          ll ~
