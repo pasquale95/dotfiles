@@ -1,5 +1,7 @@
 # dotfiles
 
+![Tests](https://github.com/pasquale95/dotfiles/actions/workflows/test.yaml/badge.svg)
+
 Collection of dotfiles that can be used to quickly setup a new macOS.
 
 ## Table of Contents <!-- omit in toc -->
