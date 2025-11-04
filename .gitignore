@@ -8,6 +8,7 @@ logs/
 # dotfiles
 .secrets
 .local_config
+backup
 
 # iterm2
 .config/iterm2/AppSupport

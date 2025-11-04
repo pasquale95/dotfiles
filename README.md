@@ -29,6 +29,13 @@ cd $DOTFILES_REPO_DIR
 ./install.sh
 ```
 
+The installation process fails if there are conflicting files. In that case, run:
+
+```shell
+# backs up conflicting files and forces installation
+./install.sh --force
+```
+
 ### Install dependencies
 
 Some aliases and functions require some packages to be installed. If you want, you can install them by running:

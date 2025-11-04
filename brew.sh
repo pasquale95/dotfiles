@@ -7,7 +7,7 @@
 if (! command -v brew >/dev/null 2>&1); then
     if [ ! -f /opt/homebrew/bin/brew ] || [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
         # install since not present
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
     # source brew env
