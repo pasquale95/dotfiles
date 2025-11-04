@@ -19,6 +19,8 @@ jobs:
 
       # Install dotfiles
       - name: Install dotfiles
+        env:
+          DOTFILES_REPO_DIR: ${{ github.workspace }}
         run: |
           ./install.sh --deps --force
 
