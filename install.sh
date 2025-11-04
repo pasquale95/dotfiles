@@ -52,12 +52,6 @@ if [[ INSTALL_DEPS -eq 1 ]]; then
     "${DOTFILES_REPO_DIR}/brew.sh"
 fi
 
-# install missing dependency
-if (! command -v stow >/dev/null 2>&1); then
-    echo "stow is not installed. Installing it..."
-    brew install stow
-fi
-
 if [[ INSTALL_FORCE -eq 1 ]]; then
     # move all conflicting files under ~/.dot-backup
     mkdir -p "${DOTFILES_REPO_DIR}/backup"
