@@ -34,6 +34,7 @@ dot-sync() {
 dot-add-env() {
     local env_file input name value
     if [[ "$1" == "--local" ]]; then
+        # add to .local-config as local option
         env_file="${DOTFILES_REPO_DIR:-${HOME}/dotfiles}/.local_config"
         input="$2"
         if [[ "$input" == *"="* ]]; then
@@ -44,6 +45,7 @@ dot-add-env() {
             value="$3"
         fi
     else
+        # add to .env as general option
         env_file="${DOTFILES_REPO_DIR:-${HOME}/dotfiles}/.env"
         input="$1"
         if [[ "$input" == *"="* ]]; then
@@ -54,6 +56,16 @@ dot-add-env() {
             value="$2"
         fi
     fi
+    
+    # Check if variable already exists and remove it
+    if grep -q "^export ${name}=" "$env_file"; then
+        # Use a temporary file for safe editing
+        local temp_file="${env_file}.tmp"
+        grep -v "^export ${name}=" "$env_file" > "$temp_file"
+        mv "$temp_file" "$env_file"
+    fi
+    
+    # Add the new/updated export
     echo "export ${name}=${value}" >> "$env_file"
 }
 
