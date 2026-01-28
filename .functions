@@ -75,23 +75,24 @@ git-prune-local() {
     git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -D
 }
 
+# set docker socket to podman socket
+podman-set-socket() {
+    local socket="${1:-${HOME}/.local/share/containers/podman/machine/podman.sock}"
+
+    sudo rm /var/run/docker.sock
+    sudo ln -s "$socket" /var/run/docker.sock
+}
+
 # set lima machine for podman
 podman-use-lima() {
     limactl start podman
     podman system connection default podman
-    sudo rm /var/run/docker.sock
-    sudo ln -s "${HOME}/.lima/podman/sock/podman.sock" /var/run/docker.sock
-}
-
-# set docker socket to podman socket
-podman-set-socket() {
-    sudo ln -s "${HOME}/.local/share/containers/podman/machine/podman.sock" /var/run/docker.sock
+    podman-set-socket "${HOME}/.lima/podman/sock/podman.sock"
 }
 
 # set default machine for podman
 podman-use-default() {
     podman system connection default podman-machine-default-root
-    sudo rm /var/run/docker.sock
     podman-set-socket
 }
 
