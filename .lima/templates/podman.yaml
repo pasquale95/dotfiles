@@ -1,18 +1,23 @@
-minimumLimaVersion: 1.1.0
+minimumLimaVersion: 2.0.0
 
+# VM settings
 cpus: 4
 memory: "16GiB"
 disk: "100GiB"
 
+# Templates to use as base
 base:
-  - template://_images/fedora-41
-  - template://_default/mounts
+  - template:_images/fedora-43
+  - template:_default/mounts
 
+# Disable containerd
 containerd:
   system: false
   user: false
 
+# Provision scripts to setup the VM
 provision:
+  # System-level setup (runs as root)
   - mode: system
     script: |
       #!/bin/bash
@@ -32,7 +37,7 @@ provision:
         'runc = ["/usr/bin/runc"]' \
         'crun = ["/usr/bin/crun"]' \
         > /etc/containers/containers.conf
-
+  # User-level setup (runs as normal user)
   - mode: user
     script: |
       #!/bin/bash
@@ -45,6 +50,7 @@ provision:
       # Your existing service enable
       systemctl --user enable --now podman.socket
 
+# Health probes
 probes:
   - script: |
       #!/bin/bash
@@ -59,6 +65,7 @@ portForwards:
   - guestSocket: "/run/user/{{.UID}}/podman/podman.sock"
     hostSocket: "{{.Dir}}/sock/podman.sock"
 
+# Startup message
 message: |
   ======================================================================
   podman VM ready!
