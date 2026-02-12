@@ -15,6 +15,11 @@ mounts:
     writable: true
 
 # Disable containerd
+# We must disable containerd because the docker installation
+# script installs and configures containerd already, causing
+# issues for rootless docker.
+# containerd could be enabled also for root, but is setup
+# by docker script anyway.
 containerd:
   system: false
   user: false
