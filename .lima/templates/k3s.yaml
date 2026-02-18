@@ -13,6 +13,11 @@
 
 minimumLimaVersion: 2.0.0
 
+# VM settings
+cpus: 4
+memory: "16GiB"
+disk: "100GiB"
+
 # Mounts are disabled in this template, but can be enabled optionally.
 mounts:
   - location: "~/.kube" # Host path (writable)
@@ -46,7 +51,7 @@ provision:
         sed -i 's/user: default$/user: k3s/g' /etc/rancher/k3s/k3s.yaml
 
         # Merge the k3s kubeconfig with the host ~/.kube/config
-        KUBECONFIG="/host-kube/config:/etc/rancher/k3s/k3s.yaml" kubectl config view --flatten > /tmp/kubectl-merged.tmp
+        KUBECONFIG="/etc/rancher/k3s/k3s.yaml:/host-kube/config" kubectl config view --flatten > /tmp/kubectl-merged.tmp
       fi
 probes:
   - script: |
