@@ -1,0 +1,106 @@
+# Deploy kubernetes via k3s (which installs a bundled containerd).
+# $ limactl start ~/.lima/templates/k3s.yaml
+# $ limactl shell k3s kubectl
+#
+# The kubeconfig is automatically merged into ~/.kube/config on VM start.
+# The k3s cluster is accessible from the host via the lima0 network interface.
+# Simply use kubectl directly:
+#
+# $ kubectl config use-context k3s
+# $ kubectl get nodes
+# NAME       STATUS   ROLES           AGE   VERSION
+# lima-k3s   Ready    control-plane   69s   v1.34.4+k3s1
+
+minimumLimaVersion: 2.0.0
+
+# Mounts are disabled in this template, but can be enabled optionally.
+mounts:
+  - location: "~/.kube" # Host path (writable)
+    mountPoint: "/host-kube"
+    writable: true
+
+# Using vzNAT is required for the k3s cluster to be accessible from the host.
+networks:
+  - vzNAT: true
+
+# containerd is managed by k3s, not by Lima, so the values are set to false here.
+containerd:
+  system: false
+  user: false
+provision:
+  - mode: system
+    script: |
+      #!/bin/sh
+      if [ ! -d /var/lib/rancher/k3s ]; then
+        # Get the IP address of lima0 interface
+        LIMA_IP=$(ip -4 addr show lima0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+        
+        # Install k3s
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644 --node-ip ${LIMA_IP} --advertise-address ${LIMA_IP} --bind-address ${LIMA_IP}" sh -
+
+        # Rename cluster from default to k3s
+        KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
+        kubectl config rename-context default k3s
+        kubectl config set-context k3s --cluster=k3s
+        
+        # Merge the k3s kubeconfig with the host ~/.kube/config
+        KUBECONFIG="/host-kube/config:/etc/rancher/k3s/k3s.yaml" kubectl config view --flatten > /tmp/kubectl-merged.tmp
+      fi
+probes:
+  - script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      if ! timeout 30s bash -c "until test -f /etc/rancher/k3s/k3s.yaml; do sleep 3; done"; then
+        echo >&2 "k3s is not running yet"
+        exit 1
+      fi
+    hint: |
+      The k3s kubeconfig file has not yet been created.
+      Run "limactl shell k3s sudo journalctl -u k3s" to check the log.
+      If that is still empty, check the bottom of the log at "/var/log/cloud-init-output.log".
+copyToHost:
+  - guest: "/tmp/kubectl-merged.tmp"
+    host: "{{.Home}}/.kube/config"
+    deleteOnStop: false
+message: |
+  k3s cluster is ready!
+  ------
+  To use the cluster:
+  $ kubectl config use-context k3s
+  $ kubectl get nodes
+  ------
+
+images:
+  # Try to use release-yyyyMMdd image if available. Note that release-yyyyMMdd will be removed after several months.
+  - location: "https://cloud-images.ubuntu.com/releases/noble/release-20251213/ubuntu-24.04-server-cloudimg-amd64.img"
+    arch: "x86_64"
+    digest: "sha256:2b5f90ffe8180def601c021c874e55d8303e8bcbfc66fee2b94414f43ac5eb1f"
+  - location: "https://cloud-images.ubuntu.com/releases/noble/release-20251213/ubuntu-24.04-server-cloudimg-arm64.img"
+    arch: "aarch64"
+    digest: "sha256:a40713938d74aaec811f74cb1fa8bfcb535d22e26b2a0ca1cc90ad9db898feb9"
+  - location: "https://cloud-images.ubuntu.com/releases/noble/release-20251213/ubuntu-24.04-server-cloudimg-riscv64.img"
+    arch: "riscv64"
+    digest: "sha256:8d357cfcb65bc28c02383b8bc4a0a27b608848229d6a77bf9ca76097221b6134"
+  - location: "https://cloud-images.ubuntu.com/releases/noble/release-20251213/ubuntu-24.04-server-cloudimg-armhf.img"
+    arch: "armv7l"
+    digest: "sha256:518f863349b11fd6debfe05ca16686b6008499a8875d7fcc28296d9f7bd4f0c1"
+  - location: "https://cloud-images.ubuntu.com/releases/noble/release-20251213/ubuntu-24.04-server-cloudimg-s390x.img"
+    arch: "s390x"
+    digest: "sha256:13c7887f3479fe5887c32485214f64f6ae79b0b88bb722a0847866c6a242ab49"
+  - location: "https://cloud-images.ubuntu.com/releases/noble/release-20251213/ubuntu-24.04-server-cloudimg-ppc64el.img"
+    arch: "ppc64le"
+    digest: "sha256:50e401704d05407c041b150f99ec2d195e206ae44610456f8059b45e66284c98"
+  # Fallback to the latest release image.
+  # Hint: run `limactl prune` to invalidate the cache
+  - location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img
+    arch: x86_64
+  - location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-arm64.img
+    arch: aarch64
+  - location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-riscv64.img
+    arch: riscv64
+  - location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-armhf.img
+    arch: armv7l
+  - location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-s390x.img
+    arch: s390x
+  - location: https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-ppc64el.img
+    arch: ppc64le
