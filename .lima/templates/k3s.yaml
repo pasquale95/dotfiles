@@ -41,8 +41,10 @@ provision:
         # Rename cluster from default to k3s
         KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
         kubectl config rename-context default k3s
-        kubectl config set-context k3s --cluster=k3s
-        
+        sed -i 's/name: default$/name: k3s/g' /etc/rancher/k3s/k3s.yaml
+        sed -i 's/cluster: default$/cluster: k3s/g' /etc/rancher/k3s/k3s.yaml
+        sed -i 's/user: default$/user: k3s/g' /etc/rancher/k3s/k3s.yaml
+
         # Merge the k3s kubeconfig with the host ~/.kube/config
         KUBECONFIG="/host-kube/config:/etc/rancher/k3s/k3s.yaml" kubectl config view --flatten > /tmp/kubectl-merged.tmp
       fi
