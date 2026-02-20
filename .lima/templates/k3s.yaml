@@ -20,7 +20,9 @@ disk: "100GiB"
 
 # Mounts are disabled in this template, but can be enabled optionally.
 mounts:
-  - location: "~/.kube" # Host path (writable)
+  - location: "{{.Home}}"
+    writable: false
+  - location: "{{.Home}}/.kube"
     mountPoint: "/host-kube"
     writable: true
 
@@ -32,10 +34,13 @@ networks:
 containerd:
   system: false
   user: false
+
 provision:
   - mode: system
     script: |
       #!/bin/sh
+
+      # Massage kubectl config to be ok for the host.
       if [ ! -d /var/lib/rancher/k3s ]; then
         # Get the IP address of lima0 interface
         LIMA_IP=$(ip -4 addr show lima0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
@@ -43,16 +48,17 @@ provision:
         # Install k3s
         curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644 --node-ip ${LIMA_IP} --advertise-address ${LIMA_IP} --bind-address ${LIMA_IP}" sh -
 
-        # Rename cluster from default to k3s
-        KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
-        kubectl config rename-context default k3s
-        sed -i 's/name: default$/name: k3s/g' /etc/rancher/k3s/k3s.yaml
-        sed -i 's/cluster: default$/cluster: k3s/g' /etc/rancher/k3s/k3s.yaml
-        sed -i 's/user: default$/user: k3s/g' /etc/rancher/k3s/k3s.yaml
-
-        # Merge the k3s kubeconfig with the host ~/.kube/config
-        KUBECONFIG="/etc/rancher/k3s/k3s.yaml:/host-kube/config" kubectl config view --flatten > /tmp/kubectl-merged.tmp
       fi
+      
+      # Rename cluster from default to k3s
+      KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
+      kubectl config rename-context default k3s
+      sed -i 's/name: default$/name: k3s/g' /etc/rancher/k3s/k3s.yaml
+      sed -i 's/cluster: default$/cluster: k3s/g' /etc/rancher/k3s/k3s.yaml
+      sed -i 's/user: default$/user: k3s/g' /etc/rancher/k3s/k3s.yaml
+      
+      # Merge the k3s kubeconfig with the host {{.Home}}/.kube/config
+      KUBECONFIG="/etc/rancher/k3s/k3s.yaml:/host-kube/config" kubectl config view --flatten > /tmp/kubectl-merged.tmp
 probes:
   - script: |
       #!/bin/bash
@@ -65,10 +71,14 @@ probes:
       The k3s kubeconfig file has not yet been created.
       Run "limactl shell k3s sudo journalctl -u k3s" to check the log.
       If that is still empty, check the bottom of the log at "/var/log/cloud-init-output.log".
+
+# Copy files from VM to host
 copyToHost:
   - guest: "/tmp/kubectl-merged.tmp"
     host: "{{.Home}}/.kube/config"
     deleteOnStop: false
+
+# Startup message
 message: |
   k3s cluster is ready!
   ------

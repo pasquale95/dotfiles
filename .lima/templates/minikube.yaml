@@ -1,0 +1,123 @@
+minimumLimaVersion: 2.0.0
+
+# VM settings
+cpus: 4
+memory: "16GiB"
+disk: "100GiB"
+
+# Templates to use as base
+base:
+  - template:_images/fedora-43
+
+# Mounts are disabled in this template, but can be enabled optionally.
+mounts:
+  - location: "{{.Home}}"
+    writable: false
+  - location: "{{.Home}}/.kube"
+    mountPoint: "/host-kube"
+    writable: true
+
+# Using vzNAT is required for the VM to be accessible from the host.
+networks:
+  - vzNAT: true
+
+# Docker installs containerd
+containerd:
+  system: false
+  user: false
+
+ssh:
+  # Load SSH public keys from host into VM
+  loadDotSSHPubKeys: true
+  forwardAgent: true
+
+# Forward port where minikube server listens
+portForwards:
+  - guestPort: 8443
+    hostPort: 8443
+    proto: tcp
+
+# Provision scripts to setup the VM
+provision:
+  # System-level setup (runs as root)
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+
+      # Check if already provisioned
+      test -e /etc/lima-fedora-system-provision && exit 0
+
+      # Detect architecture
+      ARCH=$(uname -m)
+      case $ARCH in
+        x86_64)
+          ARCH="amd64"
+          ;;
+        aarch64)
+          ARCH="arm64"
+          ;;
+        *)
+          echo "Unsupported architecture: $ARCH"
+          exit 1
+          ;;
+      esac
+
+      # Install minikube
+      curl -LO "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-${ARCH}"
+      install "minikube-linux-${ARCH}" /usr/local/bin/minikube
+      rm "minikube-linux-${ARCH}"
+
+      # Install kubectl
+      KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+      curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${ARCH}/kubectl"
+      install kubectl /usr/local/bin/kubectl
+      rm kubectl
+
+      # Ensure SSH server is enabled
+      systemctl enable --now sshd
+
+      # Mark provisioning as complete
+      touch /etc/lima-fedora-system-provision
+  # User-level setup (runs as normal user)
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+
+      # Start minikube with none driver (uses existing environment)
+      minikube start --driver=podman --container-runtime=containerd --ports=8443:8443 -p minikube-lima
+
+      # Get the IP address of lima0 interface
+      ETH0_IP=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+      LIMA_IP=$(ip -4 addr show lima0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+      
+      # Replace the IP address in the kubeconfig file
+      sed -i "s|${ETH0_IP}|${LIMA_IP}|g" {{.Home}}/.kube/config
+      # Merge the minikube kubeconfig with the host {{.Home}}/.kube/config
+      KUBECONFIG="{{.Home}}/.kube/config:/host-kube/config" kubectl config view --flatten > /tmp/kubectl-merged.tmp
+
+# Health probes
+probes:
+  - script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      
+      # Check if Kubernetes is running
+      kubectl cluster-info
+    hint: See "/var/log/cloud-init-output.log" in the guest
+
+# Copy files from VM to host
+copyToHost:
+  - guest: "/tmp/kubectl-merged.tmp"
+    host: "{{.Home}}/.kube/config"
+    deleteOnStop: false
+
+# Startup message
+message: |
+  minikube cluster is ready!
+  ------
+  To use the cluster:
+  $ kubectl config use-context minikube-lima
+  $ kubectl get nodes
+  ------
