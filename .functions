@@ -323,3 +323,89 @@ opencert() {
 
     openssl x509 -in "$cert_path" -text -noout | less
 }
+
+# Start a Qdrant container for codebase indexing.
+# The container is by default called qdrant and its
+# data is stored under $HOME/.qdrant.
+qdrant-start() {
+    local container_name="${QDRANT_CONTAINER_NAME:-qdrant}"
+    local storage_path="$HOME/.qdrant"
+
+    mkdir -p "$storage_path"
+
+    if docker container inspect "$container_name" >/dev/null 2>&1; then
+        echo "Qdrant container already running. If you want to restart run first 'qdrant-restart'."
+    else
+        echo "Creating and starting new global Qdrant container..."
+        
+        # We explicitly invoke bash to use its /dev/tcp built-in for raw HTTP communication
+        docker run -d --name "$container_name" \
+            --restart unless-stopped \
+            -p 6333:6333 \
+            -p 6334:6334 \
+            -v "$storage_path:/qdrant/storage" \
+            --health-cmd="bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333 && echo -e \"GET /readyz HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && grep -q \"HTTP/1.1 200\" <&3'" \
+            --health-interval=5s \
+            --health-timeout=3s \
+            --health-retries=5 \
+            --health-start-period=5s \
+            qdrant/qdrant
+        
+        # Wait for the container to become healthy
+        echo -n "Waiting for Qdrant to be ready..."
+        while true; do
+            local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null)
+            
+            if [ "$health_status" = "healthy" ]; then
+                echo -e "\n✅ Qdrant is healthy and ready to serve requests!"
+                break
+            elif [ "$health_status" = "unhealthy" ]; then
+                echo -e "\n❌ Qdrant failed to start properly. Check 'docker logs $container_name'."
+                break
+            else
+                echo -n "."
+                sleep 1
+            fi
+        done
+    fi
+
+    
+    echo "Dashboard available at: http://localhost:6333/dashboard"
+}
+
+# Stop a qdrant container
+qdrant-stop() {
+    local container_name="${QDRANT_CONTAINER_NAME:-qdrant}"
+    local storage_path="$HOME/.qdrant"
+
+    # Only attempt removal if the container exists
+    if docker container inspect "$container_name" >/dev/null 2>&1; then
+        echo "Stopping and removing global Qdrant container..."
+        docker rm -f "$container_name"
+        echo "Container removed. Indexed data is preserved in $storage_path"
+    else
+        echo "Container '$container_name' does not exist."
+    fi
+}
+
+# Delete qdrant container and its data.
+qdrant-delete() {
+    local container_name="${QDRANT_CONTAINER_NAME:-qdrant}"
+    local storage_path="$HOME/.qdrant"
+
+    # Only attempt removal if the container exists
+    if docker container inspect "$container_name" >/dev/null 2>&1; then
+        echo "Stopping and removing global Qdrant container..."
+        docker rm -f "$container_name"
+        rm -rf "$storage_path"
+        echo "Container $container_name and data at $storage_path successfully removed."
+    else
+        echo "Container '$container_name' does not exist."
+    fi
+}
+
+# Restart a qdrant container.
+qdrant-restart() {
+    qdrant-stop
+    qdrant-start
+}
