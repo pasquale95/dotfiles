@@ -1,6 +1,8 @@
 {
   "permissions": {
-    "allow": ["WebSearch"]
+    "allow": [
+      "WebSearch"
+    ]
   },
   "hooks": {
     "SessionStart": [
@@ -14,5 +16,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true
   }
 }
