@@ -79,7 +79,7 @@ git-prune-local() {
 podman-set-socket() {
     local socket="${1:-${HOME}/.local/share/containers/podman/machine/podman.sock}"
 
-    sudo rm /var/run/docker.sock
+    sudo rm -f /var/run/docker.sock
     sudo ln -s "$socket" /var/run/docker.sock
 }
 
