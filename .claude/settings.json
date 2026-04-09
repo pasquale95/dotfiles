@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["WebSearch"],
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:docs.yugabyte.com)",
+      "WebFetch(domain:github.com)"
+    ],
     "deny": [
       "Read(~/.ssh/**)",
       "Write(~/.ssh/**)",
@@ -54,7 +58,8 @@
       "Write(~/Pictures/**)",
       "Read(~/.Trash/**)",
       "Write(~/.Trash/**)"
-    ]
+    ],
+    "additionalDirectories": ["/Users/pco/.claude/plans"]
   },
   "hooks": {
     "SessionStart": [
