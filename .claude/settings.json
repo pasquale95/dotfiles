@@ -96,5 +96,6 @@
         "repo": "openai/codex-plugin-cc"
       }
     }
-  }
+  },
+  "theme": "dark"
 }
