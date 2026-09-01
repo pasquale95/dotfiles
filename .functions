@@ -154,40 +154,54 @@ cut_video() {
     echo "Cut video from $start to $end as $output"
 }
 
-# Generate gif from video with optional start and end time
+# Generate gif from video, with optional trim/speed/fps flags
 gif() {
-    if [ $# -lt 1 ] || [ $# -gt 4 ]; then
-        echo "Usage: gif <input_file> [output_file] [start_time] [end_time]"
-        echo "If no start/end specified: converts entire video to GIF"
+    if [ $# -lt 1 ]; then
+        echo "Usage: gif <input_file> [--output=file] [--start=mm:ss] [--end=mm:ss] [--speed=2x] [--fps=15]"
         echo "Time format: mm:ss or hh:mm:ss"
-        echo "Example: gif video.mp4 video.gif 0:05 1:15"
+        echo "Example: gif video.mp4 --start=0:05 --end=1:15 --speed=2x --fps=10"
         return 1
     fi
-    
+
     local input="$1"
-    local output="${2:-${input%.*}.gif}"
-    local start="$3"
-    local end="$4"
-    local conversion_format="fps=15,scale=1920:-1"
-    
+    shift
+
+    local output="" start="" end="" speed="1" fps="15"
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            --output=*) output="${arg#--output=}" ;;
+            --start=*) start="${arg#--start=}" ;;
+            --end=*) end="${arg#--end=}" ;;
+            --speed=*) speed="${arg#--speed=}" ;;
+            --fps=*) fps="${arg#--fps=}" ;;
+            *)
+                echo "Unknown option: $arg"
+                return 1
+                ;;
+        esac
+    done
+
     if [ ! -f "$input" ]; then
         echo "Error: Input file '$input' not found"
         return 1
     fi
 
-    if [ -z "$start" ]; then
-        # Convert entire video
-        ffmpeg -i "$input" -vf "$conversion_format" -loop 0 "$output"
-        echo "Converted entire video as $output"
-    elif [ -z "$end" ]; then
-        # Extract segment
-        ffmpeg -i "$input" -ss "$start" -vf "$conversion_format" -loop 0 "$output"
-        echo "Converted video from $start as $output"
-    else
-        # Extract segment
-        ffmpeg -i "$input" -ss "$start" -to "$end" -vf "$conversion_format" -loop 0 "$output"
-        echo "Converted video from $start to $end as $output"
+    output="${output:-${input%.*}.gif}"
+    speed="${speed%x}"
+
+    local filters="fps=${fps},scale=1920:-1"
+    if [ "$speed" != "1" ]; then
+        filters="setpts=PTS/${speed},${filters}"
     fi
+
+    local ffmpeg_args=(-i "$input")
+    [ -n "$start" ] && ffmpeg_args+=(-ss "$start")
+    [ -n "$end" ] && ffmpeg_args+=(-to "$end")
+    ffmpeg_args+=(-vf "$filters" -loop 0 "$output")
+
+    ffmpeg "${ffmpeg_args[@]}"
+    echo "Converted $input to $output (fps=${fps}, speed=${speed}x)"
 }
 
 # Return the size of a given path
