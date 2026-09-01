@@ -9,6 +9,7 @@ logs/
 .secrets
 .local_config
 backup
+.claude/
 
 # iterm2
 .config/iterm2/AppSupport
