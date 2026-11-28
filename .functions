@@ -72,7 +72,11 @@ dot-add-env() {
 # prune all local branches that do not have a remote anymore
 git-prune-local() {
     git fetch -p
-    git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -D
+    git worktree prune
+    # delete gone branches; skip (and report) those still checked out in a worktree
+    git for-each-ref --format='%(refname:short) %(upstream:track) %(worktreepath)' refs/heads |
+        awk '$2 == "[gone]" { if ($3 == "") print $1; else print "skip " $1 " (worktree: " $3 ")" > "/dev/stderr" }' |
+        xargs -r git branch -D
 }
 
 # set docker socket to podman socket
